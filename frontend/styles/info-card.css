@@ -1,0 +1,8 @@
+.info-card {
+    border: 1px solid var(--lumo-contrast-10pct);
+    box-shadow: var(--lumo-box-shadow-s);
+    padding: var(--lumo-space-m);
+    margin-bottom: var(--lumo-space-m);
+    border-radius: var(--lumo-border-radius);
+    background-color: var(--lumo-base-color);
+}
