@@ -5,7 +5,7 @@ import java.util.List;
 import gov.noaa.ims.nwsconnect.components.contactuploader.enums.ContactIssueType;
 
 public class Issue {
-    private Contact contactInSystem;
+    private ContactDTO contactInSystem;
     private ContactIssueType issueType;
 
     /**
@@ -23,16 +23,16 @@ public class Issue {
      * @param contactInSystem The contact in the system
      * @param issueType       The issue type
      */
-    public Issue(Contact contactInSystem, ContactIssueType issueType) {
+    public Issue(ContactDTO contactInSystem, ContactIssueType issueType) {
         this.contactInSystem = contactInSystem;
         this.issueType = issueType;
     }
 
-    public Contact getContactInSystem() {
+    public ContactDTO getContactInSystem() {
         return contactInSystem;
     }
 
-    public void setContactInSystem(Contact contact) {
+    public void setContactInSystem(ContactDTO contact) {
         this.contactInSystem = contact;
     }
 

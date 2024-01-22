@@ -166,6 +166,8 @@ public class ContactDTO {
     @JsonProperty("hamCall")
     private String hamCall;
 
+    private String office;
+
     public String getContactBaseType() {
         return contactBaseType;
     }
@@ -790,7 +792,13 @@ public class ContactDTO {
         this.hamCall = hamCall;
     }
 
-  
+    public String getOffice() {
+        return this.office;
+    }
+
+    public void setOffice(String office) {
+        this.office = office;
+    }
 
     @Override
     public String toString() {

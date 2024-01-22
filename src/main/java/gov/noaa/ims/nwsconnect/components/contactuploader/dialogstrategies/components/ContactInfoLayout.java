@@ -1,13 +1,16 @@
 package gov.noaa.ims.nwsconnect.components.contactuploader.dialogstrategies.components;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import gov.noaa.ims.nwsconnect.components.contactuploader.model.ContactDTO;
 
@@ -21,13 +24,12 @@ public class ContactInfoLayout extends VerticalLayout {
     private CheckboxChangeListener checkboxChangeListener;
 
     private final Label nameLabel = new Label();
-    private final Label emailLabel = new Label();
-    private final Label phoneLabel = new Label();
-    private final Label officeLabel = new Label();
-
+    private final Label warningLabel = new Label("Name will be overwritten in the system.");
     private final Checkbox nameCheckbox = new Checkbox();
-    private final Checkbox emailCheckbox = new Checkbox();
-    private final Checkbox phoneCheckbox = new Checkbox();
+
+    private List<EmailComponent> emailComponents = new ArrayList<>();
+    private List<PhoneComponent> phoneComponents = new ArrayList<>();
+    private List<AddressComponent> addressComponents = new ArrayList<>();
 
     private ContactDTO contactDTO;
 
@@ -35,15 +37,109 @@ public class ContactInfoLayout extends VerticalLayout {
         addClassName("info-card");
         initializeComponents();
         layoutComponents();
-
-        attachValueChangeListeners();
     }
 
-    private void attachValueChangeListeners() {
-        nameCheckbox.addValueChangeListener(e -> notifyCheckboxChange());
-        emailCheckbox.addValueChangeListener(e -> notifyCheckboxChange());
-        phoneCheckbox.addValueChangeListener(e -> notifyCheckboxChange());
+    private void initializeComponents() {
 
+        warningLabel.addClassName(LumoUtility.TextColor.ERROR);
+
+        nameCheckbox.setVisible(false);
+
+        nameCheckbox.addValueChangeListener(listener -> warningLabel.setVisible(listener.getValue()));
+    }
+
+    private void layoutComponents() {
+        warningLabel.setVisible(false);
+
+        Avatar userAvatar = new Avatar();
+        userAvatar.addClassName("user-avatar");
+
+        HorizontalLayout header = new HorizontalLayout(nameCheckbox, userAvatar, nameLabel, warningLabel);
+        header.setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        header.addClassName("contact-header");
+
+        add(header);
+    }
+
+    public void setContact(ContactDTO contactDTO) {
+        this.contactDTO = contactDTO;
+        nameLabel.setText(contactDTO.getFirstName() + " " + contactDTO.getLastName());
+        updateAvatar(contactDTO.getFirstName(), contactDTO.getLastName());
+
+        removeAll();
+        layoutComponents();
+
+        add(new Hr());
+        handleEmails(contactDTO);
+        add(new Hr());
+        handlePhones(contactDTO);
+        add(new Hr());
+        handleAddresses(contactDTO);
+    }
+
+    private void handlePhones(ContactDTO contactDTO) {
+        addPhoneComponent(contactDTO.getPhoneType1(), contactDTO.getPhoneNumber1(), contactDTO.getPhoneExtension1(),
+                contactDTO.getPhoneSms1());
+        addPhoneComponent(contactDTO.getPhoneType2(), contactDTO.getPhoneNumber2(), contactDTO.getPhoneExtension2(),
+                contactDTO.getPhoneSms2());
+        addPhoneComponent(contactDTO.getPhoneType3(), contactDTO.getPhoneNumber3(), contactDTO.getPhoneExtension3(),
+                contactDTO.getPhoneSms3());
+    }
+
+    private void addPhoneComponent(String phoneType, Long phoneNumber, String phoneExtension, Boolean phoneSms) {
+        if (phoneNumber != null) {
+            PhoneComponent phoneComp = new PhoneComponent();
+            phoneComp.setPhone(phoneType, phoneNumber, phoneExtension, phoneSms);
+            phoneComponents.add(phoneComp);
+            add(phoneComp);
+            phoneComp.getPhoneCheckbox().addValueChangeListener(e -> notifyCheckboxChange());
+        }
+    }
+
+    private void handleAddresses(ContactDTO contactDTO) {
+        addAddressComponent(contactDTO.getAddressType1(), contactDTO.getAddressFieldA1(),
+                contactDTO.getAddressFieldB1(),
+                contactDTO.getAddressCity1(), contactDTO.getAddressState1(), contactDTO.getAddressProvince1(),
+                contactDTO.getAddressCountry1(), contactDTO.getAddressCounty1(), contactDTO.getAddressPostalCode1());
+
+        addAddressComponent(contactDTO.getAddressType2(), contactDTO.getAddressFieldA2(),
+                contactDTO.getAddressFieldB2(),
+                contactDTO.getAddressCity2(), contactDTO.getAddressState2(), contactDTO.getAddressProvince2(),
+                contactDTO.getAddressCountry2(), contactDTO.getAddressCounty2(), contactDTO.getAddressPostalCode2());
+
+        addAddressComponent(contactDTO.getAddressType3(), contactDTO.getAddressFieldA3(),
+                contactDTO.getAddressFieldB3(),
+                contactDTO.getAddressCity3(), contactDTO.getAddressState3(), contactDTO.getAddressProvince3(),
+                contactDTO.getAddressCountry3(), contactDTO.getAddressCounty3(), contactDTO.getAddressPostalCode3());
+
+    }
+
+    private void handleEmails(ContactDTO contactDTO) {
+        addEmailComponent(contactDTO.getEmailType1(), contactDTO.getEmailAddress1());
+        addEmailComponent(contactDTO.getEmailType2(), contactDTO.getEmailAddress2());
+        addEmailComponent(contactDTO.getEmailType3(), contactDTO.getEmailAddress3());
+    }
+
+    private void addAddressComponent(String addressType, String fieldA, String fieldB, String city,
+            String state, String province, String country, String county, String postalCode) {
+        // Check if the primary field of the address (e.g., fieldA) is not empty
+        if (fieldA != null && !fieldA.isEmpty()) {
+            AddressComponent addressComp = new AddressComponent();
+            addressComp.setAddress(addressType, fieldA, fieldB, city, state, province, country, county, postalCode);
+            addressComponents.add(addressComp);
+            add(addressComp);
+            addressComp.getAddressCheckbox().addValueChangeListener(e -> notifyCheckboxChange());
+        }
+    }
+
+    private void addEmailComponent(String emailType, String emailAddress) {
+        if (emailAddress != null && !emailAddress.isEmpty()) {
+            EmailComponent emailComponent = new EmailComponent();
+            emailComponent.setEmail(emailAddress, emailType);
+            emailComponents.add(emailComponent);
+            add(emailComponent);
+            emailComponent.getEmailCheckbox().addValueChangeListener(e -> notifyCheckboxChange());
+        }
     }
 
     private void notifyCheckboxChange() {
@@ -52,71 +148,15 @@ public class ContactInfoLayout extends VerticalLayout {
         }
     }
 
-    private void initializeComponents() {
-
-        nameCheckbox.setVisible(false);
-        emailCheckbox.setVisible(false);
-        phoneCheckbox.setVisible(false);
-        nameLabel.addClassName("contact-name");
+    public void showCheckboxes(boolean show) {
+        nameCheckbox.setVisible(show);
+        emailComponents.forEach(comp -> comp.showCheckbox(show));
+        phoneComponents.forEach(comp -> comp.showCheckbox(show));
+        addressComponents.forEach(comp -> comp.showCheckbox(show));
     }
 
-    private void layoutComponents() {
-        Avatar userAvatar = new Avatar();
-        userAvatar.addClassName("user-avatar");
-
-        nameLabel.addClassName("contact-name");
-        nameCheckbox.setVisible(false);
-
-        HorizontalLayout header = new HorizontalLayout(userAvatar, nameLabel, nameCheckbox);
-        header.setDefaultVerticalComponentAlignment(Alignment.CENTER);
-        header.addClassName("contact-header");
-
-        HorizontalLayout emailLayout = createFieldLayout(emailCheckbox, VaadinIcon.ENVELOPE, emailLabel);
-        HorizontalLayout phoneLayout = createFieldLayout(phoneCheckbox, VaadinIcon.PHONE, phoneLabel);
-        HorizontalLayout officeLayout = createFieldLayout(null, VaadinIcon.OFFICE, officeLabel);
-
-        add(header, officeLayout, phoneLayout, emailLayout);
-    }
-
-    private HorizontalLayout createFieldLayout(Checkbox checkbox, VaadinIcon icon, Label label) {
-        Icon vaadinIcon = icon != null ? new Icon(icon) : null;
-        if (vaadinIcon != null) {
-            label.addClassName("contact-" + label.getElement().getTag());
-        }
-        HorizontalLayout layout = new HorizontalLayout();
-        if (vaadinIcon != null) {
-            layout.add(vaadinIcon);
-        }
-        layout.add(label);
-
-        if (checkbox != null) {
-            checkbox.setVisible(false); // Initialize the checkbox to be hidden
-            layout.add(checkbox);
-        }
-
-        layout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
-        return layout;
-    }
-
-    public void setContact(String firstName, String lastName, String emailAddress, String phoneNumber, String office) {
-        nameLabel.setText(firstName + " " + lastName);
-        emailLabel.setText(emailAddress);
-        phoneLabel.setText(phoneNumber != null ? phoneNumber : "");
-        officeLabel.setText(office);
-        storeContactDetails(firstName, lastName, emailAddress, phoneNumber);
-        updateAvatar(firstName, lastName);
-    }
-
-    private void storeContactDetails(String firstName, String lastName, String emailAddress, String phoneNumber) {
-        contactDTO = new ContactDTO();
-        contactDTO.setFirstName(firstName);
-        contactDTO.setLastName(lastName);
-        contactDTO.setEmailAddress1(emailAddress);
-        try {
-            contactDTO.setPhoneNumber1(phoneNumberToLong(phoneNumber));
-        } catch (NumberFormatException e) {
-            // Handle invalid phone number format
-        }
+    public void setCheckboxChangeListener(CheckboxChangeListener listener) {
+        this.checkboxChangeListener = listener;
     }
 
     private void updateAvatar(String firstName, String lastName) {
@@ -130,24 +170,42 @@ public class ContactInfoLayout extends VerticalLayout {
         header.addComponentAtIndex(0, userAvatar);
     }
 
-    public void showCheckboxes(boolean show) {
-        nameCheckbox.setVisible(show);
-        emailCheckbox.setVisible(show);
-        phoneCheckbox.setVisible(show);
-    }
-
     public ContactDTO getSelectedContactData() {
         ContactDTO selectedContact = new ContactDTO();
         if (nameCheckbox.getValue()) {
             selectedContact.setFirstName(contactDTO.getFirstName());
             selectedContact.setLastName(contactDTO.getLastName());
         }
-        if (emailCheckbox.getValue()) {
-            selectedContact.setEmailAddress1(contactDTO.getEmailAddress1());
+
+        // Collect selected emails, phones, and addresses
+        for (EmailComponent emailComp : emailComponents) {
+            if (emailComp.getEmailCheckbox().getValue()) {
+                selectedContact.setEmailType1(emailComp.getEmail());
+                selectedContact.setEmailAddress1(emailComp.getEmail());
+            }
         }
-        if (phoneCheckbox.getValue()) {
-            selectedContact.setPhoneNumber1(contactDTO.getPhoneNumber1());
+        for (PhoneComponent phoneComp : phoneComponents) {
+            if (phoneComp.getPhoneCheckbox().getValue()) {
+
+                selectedContact.setPhoneType1(phoneComp.getPhoneType());
+                selectedContact.setPhoneNumber1(phoneNumberToLong(phoneComp.getPhone()));
+                selectedContact.setPhoneExtension1(phoneComp.getExtensionLabel().getText());
+            }
         }
+        for (AddressComponent addressComp : addressComponents) {
+            if (addressComp.getAddressCheckbox().getValue()) {
+                selectedContact.setAddressType1(addressComp.getAddressTypeLabel().getText());
+                selectedContact.setAddressFieldA1(addressComp.getAddressFieldALabel().getText());
+                selectedContact.setAddressFieldB1(addressComp.getAddressFieldBLabel().getText());
+                selectedContact.setAddressCity1(addressComp.getCityLabel().getText());
+                selectedContact.setAddressState1(addressComp.getStateLabel().getText());
+                selectedContact.setAddressProvince1(addressComp.getProvinceLabel().getText());
+                selectedContact.setAddressCountry1(addressComp.getCountryLabel().getText());
+                selectedContact.setAddressCounty1(addressComp.getCountyLabel().getText());
+                selectedContact.setAddressPostalCode1(addressComp.getPostalCodeLabel().getText());
+            }
+        }
+
         return selectedContact;
     }
 
@@ -160,30 +218,6 @@ public class ContactInfoLayout extends VerticalLayout {
         return nameLabel;
     }
 
-    public Label getEmailLabel() {
-        return emailLabel;
-    }
-
-    public Label getPhoneLabel() {
-        return phoneLabel;
-    }
-
-    public Label getOfficeLabel() {
-        return officeLabel;
-    }
-
-    public Checkbox getNameCheckbox() {
-        return nameCheckbox;
-    }
-
-    public Checkbox getEmailCheckbox() {
-        return emailCheckbox;
-    }
-
-    public Checkbox getPhoneCheckbox() {
-        return phoneCheckbox;
-    }
-
     public ContactDTO getContactDTO() {
         return contactDTO;
     }
@@ -192,8 +226,36 @@ public class ContactInfoLayout extends VerticalLayout {
         this.contactDTO = contactDTO;
     }
 
-    public void setCheckboxChangeListener(CheckboxChangeListener listener) {
-        this.checkboxChangeListener = listener;
+    public Checkbox getNameCheckbox() {
+        return nameCheckbox;
+    }
+
+    public CheckboxChangeListener getCheckboxChangeListener() {
+        return checkboxChangeListener;
+    }
+
+    public List<EmailComponent> getEmailComponents() {
+        return emailComponents;
+    }
+
+    public void setEmailComponents(List<EmailComponent> emailComponents) {
+        this.emailComponents = emailComponents;
+    }
+
+    public List<PhoneComponent> getPhoneComponents() {
+        return phoneComponents;
+    }
+
+    public void setPhoneComponents(List<PhoneComponent> phoneComponents) {
+        this.phoneComponents = phoneComponents;
+    }
+
+    public List<AddressComponent> getAddressComponents() {
+        return addressComponents;
+    }
+
+    public void setAddressComponents(List<AddressComponent> addressComponents) {
+        this.addressComponents = addressComponents;
     }
 
 }

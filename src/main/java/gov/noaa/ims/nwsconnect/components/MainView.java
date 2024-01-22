@@ -26,16 +26,13 @@ public class MainView extends VerticalLayout {
 
         setupContactUploader();
         add(contactUploader);
-        
+
     }
 
     private void setupContactUploader() {
 
-        contactUploader.addContactListUploadedListener(listener -> {
-            ContactList contactList = listener.getContactList();
-            List<ContactIssues> contactIssueList = cureServiceMock.processContacts(contactList);
-            contactUploader.setContactIssues(contactIssueList);
-        });
+        contactUploader.setService(cureServiceMock);
+        
 
     }
 

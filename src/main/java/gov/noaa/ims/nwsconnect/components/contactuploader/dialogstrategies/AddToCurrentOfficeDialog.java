@@ -23,12 +23,6 @@ public class AddToCurrentOfficeDialog extends BaseDialog {
         private String nonPrimaryContactString;
         private String importAsNewContactString;
 
-        private final SessionCache sessionCache;
-
-        public AddToCurrentOfficeDialog(SessionCache sessionCache) {
-                this.sessionCache = sessionCache;
-        }
-
         @Override
         protected void buildDialogLayout(Dialog dialog, CureDetails details, Consumer<CureDetails> onApply) {
                 // Create instances of the ContactInfoLayout for displaying contact details
@@ -36,32 +30,22 @@ public class AddToCurrentOfficeDialog extends BaseDialog {
                 ContactInfoLayout contactToBeImportedViewer = new ContactInfoLayout();
 
                 // Set the contact details to the viewer
-                contactInSystemViewer.setContact(details.getContactInSystem().getFirstName(),
-                                details.getContactInSystem().getLastName(),
-                                details.getContactInSystem().getPrimaryEmailAddressString(),
-                                details.getContactInSystem().getPrimaryPhoneString(),
-                                details.getContactInSystem().getNwsOfficeId());
+                contactInSystemViewer.setContact(details.getContactInSystem());
 
-                String sessionUserOffice = sessionCache.getSessionUser().getNwsOfficeId();
-
-                contactToBeImportedViewer.setContact(details.getContactToBeImported().getFirstName(),
-                                details.getContactToBeImported().getLastName(),
-                                details.getContactToBeImported().getEmailAddress1(),
-                                longToPhoneNumberString(details.getContactToBeImported().getPhoneNumber1()),
-                                sessionUserOffice);
+                contactToBeImportedViewer.setContact(details.getContactToBeImported());
 
                 options.setThemeName("vertical");
                 nonPrimaryContactString = "Add as non-primary contact to current office "
-                                + details.getContactInSystem().getNwsOfficeId()
+                                + details.getContactInSystem().getOffice()
                                 + " (Other information will not be imported)";
                 importAsNewContactString = "Import as a new contact into "
-                                + sessionUserOffice;
+                                + details.getContactToBeImported().getOffice();
                 options.setItems(nonPrimaryContactString, importAsNewContactString);
                 options.setLabel("Select an option:");
 
                 // Add the ContactInfoLayout instances and other components to the dialog
                 Paragraph warningHeader = new Paragraph("The contact is already in the system in office "
-                                + details.getContactInSystem().getNwsOfficeId());
+                                + details.getContactInSystem().getOffice());
                 dialog.add(new VerticalLayout(
                                 warningHeader,
                                 new Label("Contact To Be Imported:"),
@@ -69,11 +53,6 @@ public class AddToCurrentOfficeDialog extends BaseDialog {
                                 new Label("Contact In the System:"),
                                 contactInSystemViewer,
                                 options));
-        }
-
-        private String longToPhoneNumberString(Long phoneNumber1) {
-                return String.format("(%s) %s-%s", phoneNumber1.toString().substring(0, 3),
-                                phoneNumber1.toString().substring(3, 6), phoneNumber1.toString().substring(6));
         }
 
         @Override

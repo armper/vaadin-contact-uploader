@@ -14,7 +14,6 @@ import com.vaadin.flow.component.notification.Notification;
 
 import gov.noaa.ims.nwsconnect.components.contactuploader.enums.ContactIssueType;
 import gov.noaa.ims.nwsconnect.components.contactuploader.events.CureAppliedEvent;
-import gov.noaa.ims.nwsconnect.components.contactuploader.model.Contact;
 import gov.noaa.ims.nwsconnect.components.contactuploader.model.ContactDTO;
 import gov.noaa.ims.nwsconnect.components.contactuploader.model.ContactIssues;
 import gov.noaa.ims.nwsconnect.components.contactuploader.model.ContactList;
@@ -31,7 +30,7 @@ import gov.noaa.ims.nwsconnect.components.service.strategies.NoaaEmailIssueHandl
 import gov.noaa.ims.nwsconnect.components.service.strategies.interfaces.IssueHandlerStrategy;
 
 @Service
-public class ContactCureServiceMock {
+public class ContactCureServiceMock implements ContactIssueProcessor {
 
         private final Map<ContactIssueType.CureOption, IssueHandlerStrategy> issueStrategies;
 
@@ -43,7 +42,7 @@ public class ContactCureServiceMock {
                         AddOrganizationToImsStrategy addOrganizationToImsStrategy,
                         AddGroupToImsStrategy addGroupToImsStrategy,
                         BypassStrategy bypassStrategy) {
-                 issueStrategies = new EnumMap<>(ContactIssueType.CureOption.class);
+                issueStrategies = new EnumMap<>(ContactIssueType.CureOption.class);
                 issueStrategies.put(ContactIssueType.CureOption.SEND_INVITE_LINK_FOR_NOAA, noaaLinkStrategy);
                 issueStrategies.put(ContactIssueType.CureOption.SEND_INVITE_LINK_FOR_CORE_PARTNER,
                                 corePartnerLinkStrategy);
@@ -58,6 +57,7 @@ public class ContactCureServiceMock {
                 // Autowire other strategies
         }
 
+        @Override
         public List<ContactIssues> processContacts(ContactList contactList) {
                 System.out.println("Mock Processing contacts...");
                 System.out.println("Contact List: " + contactList.toString());
@@ -69,8 +69,8 @@ public class ContactCureServiceMock {
                                 "123-456-7890");
 
                 // Contact already in the system with different office
-                Contact differentOfficeContactEmail = createMockContact("Jane", "Doe", "jane.doe@company.com",
-                                "444-456-4322", "ABQ");
+                ContactDTO differentOfficeContactEmail = createMockContactDTO("Jane", "Doe", "jane.doe@company.com",
+                                "444-456-4322");
                 mockContacts.add(createContactIssues(contactToBeImportedEmail, differentOfficeContactEmail,
                                 ContactIssueType.EMAIL_ADDRESS_EXISTS_SAME_OFFICE));
 
@@ -86,7 +86,7 @@ public class ContactCureServiceMock {
          * @param existingContact
          *                            The contact already in the system
          */
-        private ContactIssues createContactIssues(ContactDTO contactToBeImported, Contact existingContact,
+        private ContactIssues createContactIssues(ContactDTO contactToBeImported, ContactDTO existingContact,
                         ContactIssueType issueType) {
                 Issue issue = new Issue(issueType);
                 issue.setContactInSystem(existingContact);
@@ -99,17 +99,6 @@ public class ContactCureServiceMock {
                 contact.setLastName(lastName);
                 contact.setEmailAddress1(email);
                 contact.setPhoneNumber1(phoneNumberToLong(phone));
-                return contact;
-        }
-
-        private Contact createMockContact(String firstName, String lastName, String email, String phone,
-                        String officeId) {
-                Contact contact = new Contact();
-                contact.setFirstName(firstName);
-                contact.setLastName(lastName);
-                contact.setPrimaryEmailAddress(email);
-                contact.setPrimaryPhone(phone);
-                contact.setNwsOfficeId(officeId);
                 return contact;
         }
 

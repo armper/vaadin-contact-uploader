@@ -8,7 +8,7 @@ import gov.noaa.ims.nwsconnect.components.contactuploader.enums.ContactIssueType
 public class CureDetails {
     private final ContactIssueType issueType;
     private final ContactDTO contactToBeImported;
-    private final Contact contactInSystem;
+    private final ContactDTO contactInSystem;
 
     private CureOption selectedCure;
 
@@ -23,7 +23,7 @@ public class CureDetails {
      * 
      */
     public CureDetails(ContactIssueType issueType, ContactDTO contactToBeImported,
-            Contact contactInSystem) {
+            ContactDTO contactInSystem) {
         this.issueType = issueType;
         this.contactToBeImported = contactToBeImported;
         this.contactInSystem = contactInSystem;
@@ -46,7 +46,7 @@ public class CureDetails {
         return contactToBeImported;
     }
 
-    public Contact getContactInSystem() {
+    public ContactDTO getContactInSystem() {
         return contactInSystem;
     }
 

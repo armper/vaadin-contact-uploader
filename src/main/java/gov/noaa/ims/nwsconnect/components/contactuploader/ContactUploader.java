@@ -16,6 +16,7 @@ import gov.noaa.ims.nwsconnect.components.contactuploader.events.ContactListUplo
 import gov.noaa.ims.nwsconnect.components.contactuploader.model.ContactDTO;
 import gov.noaa.ims.nwsconnect.components.contactuploader.model.ContactIssues;
 import gov.noaa.ims.nwsconnect.components.contactuploader.model.ContactList;
+import gov.noaa.ims.nwsconnect.components.service.ContactIssueProcessor;
 
 @UIScope
 @SpringComponent
@@ -26,6 +27,8 @@ public class ContactUploader extends VerticalLayout {
     private ProcessingIndicatorComponent processingIndicatorComponent;
 
     private final FlaggedContactsListComponent flaggedContactsListComponent;
+
+    private ContactIssueProcessor contactIssueProcessor;
 
     public ContactUploader(FlaggedContactsListComponent flaggedContactsListComponent) {
         this.flaggedContactsListComponent = flaggedContactsListComponent;
@@ -55,8 +58,6 @@ public class ContactUploader extends VerticalLayout {
         contactUploadComponent.addFileUploadedListener(event -> {
             processingIndicatorComponent.startProcessing();
 
-            simulateFileProcessing();
-
             try (InputStream inputStream = event.getFileContent()) {
                 ObjectMapper objectMapper = new ObjectMapper();
                 List<ContactDTO> contacts = objectMapper.readValue(inputStream, new TypeReference<List<ContactDTO>>() {
@@ -64,28 +65,13 @@ public class ContactUploader extends VerticalLayout {
                 ContactList contactList = new ContactList();
                 contactList.setContacts(contacts);
 
-                fireEvent(new ContactListUploadedEvent(this, contactList));
+                List<ContactIssues> contactIssueList = contactIssueProcessor.processContacts(contactList);
+
+                setContactIssues(contactIssueList);
 
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
-    }
-
-    private void simulateFileProcessing() {
-        // Schedule a task to simulate processing delay
-        getUI().ifPresent(ui -> {
-            // Using CompletableFuture to simulate non-blocking delay
-            try {
-                Thread.sleep(1000); // Simulate processing delay
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            ui.access(() -> {
-                processingIndicatorComponent.stopProcessing();
-            });
-
         });
     }
 
@@ -95,6 +81,15 @@ public class ContactUploader extends VerticalLayout {
 
     public Registration addContactListUploadedListener(ComponentEventListener<ContactListUploadedEvent> listener) {
         return addListener(ContactListUploadedEvent.class, listener);
+    }
+
+    /**
+     * Sets the service to be used to process contacts.
+     * 
+     * @param contactProcesses
+     */
+    public void setService(ContactIssueProcessor contactProcesses) {
+        this.contactIssueProcessor = contactProcesses;
     }
 
 }
