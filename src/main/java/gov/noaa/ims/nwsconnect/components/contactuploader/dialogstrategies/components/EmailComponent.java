@@ -3,23 +3,33 @@ package gov.noaa.ims.nwsconnect.components.contactuploader.dialogstrategies.comp
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class EmailComponent extends HorizontalLayout {
+    VerticalLayout emailDetailsLayout = new VerticalLayout();
 
     private Label emailLabel = new Label("");
     private Label emailType = new Label("");
     private Checkbox emailCheckbox = new Checkbox();
 
     public EmailComponent() {
-        // Initialize layout and components
-        setDefaultVerticalComponentAlignment(Alignment.CENTER);
+        emailDetailsLayout.setPadding(false);
+        emailDetailsLayout.setSpacing(false);
 
+  
         // Add components to the layout
         add(emailCheckbox);
-        add(emailLabel, emailType);
+        emailDetailsLayout.add(emailLabel);
+        add(emailDetailsLayout);
 
         emailCheckbox.setVisible(false);
+
+        add(emailType);
+
+        setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        setWidthFull(); 
 
     }
 

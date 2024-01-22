@@ -2,9 +2,12 @@ package gov.noaa.ims.nwsconnect.components.contactuploader.dialogstrategies.comp
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 public class PhoneComponent extends HorizontalLayout {
+    VerticalLayout phoneDetailsLayout = new VerticalLayout();
 
     private Label phoneTypeLabel = new Label();
     private Label phoneLabel = new Label();
@@ -13,14 +16,22 @@ public class PhoneComponent extends HorizontalLayout {
     private Checkbox phoneCheckbox = new Checkbox();
 
     public PhoneComponent() {
-        // Initialize layout and components
-        setDefaultVerticalComponentAlignment(Alignment.CENTER);
+
+        phoneDetailsLayout.setPadding(false);
+        phoneDetailsLayout.setSpacing(false);
 
         // Add components to the layout
         add(phoneCheckbox);
-        add(phoneLabel, extensionLabel, canRecieveSmsCheckbox, phoneTypeLabel);
+        phoneDetailsLayout.add(new HorizontalLayout(phoneLabel, extensionLabel, canRecieveSmsCheckbox));
+
+        add(phoneDetailsLayout);
 
         phoneCheckbox.setVisible(false);
+
+        add(phoneTypeLabel);
+
+        setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        setWidthFull();
     }
 
     public void setPhone(String phoneType, Long phoneNumber, String phoneExtension, Boolean canRecieveSms) {

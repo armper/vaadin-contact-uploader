@@ -29,12 +29,10 @@ public class AddressComponent extends HorizontalLayout {
         addressDetailsLayout.setPadding(false);
         addressDetailsLayout.setSpacing(false);
 
-        add(addressTypeLabel);
-
         // Add labels to the addressDetailsLayout
         HorizontalLayout addressLayout = new HorizontalLayout(addressFieldALabel, addressFieldBLabel);
         addressLayout.setPadding(false);
-        
+
         HorizontalLayout cityStateZipLayout = new HorizontalLayout(cityLabel, stateLabel, provinceLabel, countyLabel,
                 postalCodeLabel);
         cityStateZipLayout.setPadding(false);
@@ -44,6 +42,13 @@ public class AddressComponent extends HorizontalLayout {
 
         // Add addressDetailsLayout to the main layout
         add(addressDetailsLayout);
+
+        // Add addressTypeLabel to the layout
+        add(addressTypeLabel);
+
+        setJustifyContentMode(FlexComponent.JustifyContentMode.END);
+        setWidthFull(); 
+
     }
 
     public void setAddress(String addressType, String addressFieldA, String addressFieldB, String city,
